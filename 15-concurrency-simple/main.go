@@ -1,11 +1,25 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
+
+func increment(counter *int, wg *sync.WaitGroup) {
+	for i := 0; i < 1000; i++ {
+		*counter++
+	}
+	wg.Done()
+}
 
 func main() {
-	// go keyword starts a new go subrouting managed by the go runtime scheduler
-	// like this it will not print the thread because main finishes first
-	// when main thread finishes, all the subroutines are killed
-	go fmt.Println("Hello from thread")
-	fmt.Println("Hello from main")
+	var counter int
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go increment(&counter, &wg)
+	go increment(&counter, &wg)
+
+	wg.Wait()
+	fmt.Println("Final counter value:", counter)
 }
